@@ -87,9 +87,7 @@ class UserList extends Component {
                     <div className="card-body">
                         <Button
                             className="btn btn-primary btn-icon-split mb-3"
-                            onClick={(event) => {
-                                showModal();
-                            }}
+                            onClick={showModal}
                         >
                             <span className="text"><FontAwesomeIcon icon={faPlus} /> Add </span>
                         </Button>
