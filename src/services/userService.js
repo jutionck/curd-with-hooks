@@ -7,11 +7,6 @@ const getServiceUsers = async () => {
     return  users;
 };
 
-const getServiceUserById = async (id) => {
-    let users = await axios.get(`/user/${id}`);
-    return  users;
-};
-
 const createServiceUser = async (data) => {
     let users = await axios.post(baseUrl, data)
     return users;
@@ -30,4 +25,4 @@ const deleteServiceUser = async (id) => {
 
 
 
-export {getServiceUsers, getServiceUserById, createServiceUser, updateServiceUser, deleteServiceUser}
+export {getServiceUsers, createServiceUser, updateServiceUser, deleteServiceUser}
