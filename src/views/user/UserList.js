@@ -1,37 +1,14 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit,faTrash} from "@fortawesome/free-solid-svg-icons";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import {Link} from "react-router-dom";
 import UserAddForm from "./UserAddForm";
+import {createServiceUser, getServiceUsers} from "../../services/userService";
 import Swal from "sweetalert2";
-import {deleteServiceUser} from "../../services/userService";
 
 const UserList = (props) => {
-    const removeUser = (id) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.value) {
-                deleteServiceUser(id).then(response => {
-                    console.log(response)
-                    window.location.reload(false)
-                })
-                Swal.fire(
-                    'Deleted!',
-                    'Your file has been deleted.',
-                    'success'
-                )
-            }
-        })
-    }
 
     let listUser = props.users.map((user, index) => {
         return (
@@ -44,8 +21,17 @@ const UserList = (props) => {
                 <td>{user.password}</td>
                 <td>
                     <Button
+                        className="btn btn-sm btn-circle btn-info"
+                        onClick={() => {
+                            props.handleShowDetails(user);
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    &nbsp;
+                    <Button
                         className="btn btn-sm btn-circle btn-danger"
-                        onClick={() => removeUser(user.userID)}
+                        onClick={() => props.removeUser(user.userID)}
                     >
                         <FontAwesomeIcon icon={faTrash} />
                     </Button>
@@ -54,6 +40,52 @@ const UserList = (props) => {
         );
     });
 
+    const [users, getUsers] = useState([]);
+
+    const loadData = () => {
+        getServiceUsers().then(res => {
+            getUsers(res.data.data);
+            console.log(res.data.data);
+        })
+    }
+
+    const initialUserState = {
+        userID:"",
+        username: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+    };
+
+    const [user, setUser] = useState(initialUserState);
+
+    const handleInputChange = event => {
+        const { name, value } = event.target;
+        setUser({ ...user, [name]: value });
+    };
+
+    const saveUser = (event) => {
+        event.preventDefault();
+        let data = {
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            password: user.password
+        };
+        createServiceUser(data)
+            .then(response => {
+                Swal.fire(
+                    'Good job!',
+                    'Create User Success!',
+                    'success'
+                ).then(r => {
+                    loadData()
+                })
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    };
     return (
         <>
             <nav aria-label="breadcrumb">
@@ -80,7 +112,6 @@ const UserList = (props) => {
                         <div className="tab-pane fade show active" id="nav-home" role="tabpanel"
                              aria-labelledby="nav-home-tab">
                             <p></p>
-
                             <div className="table-responsive">
                                 <Table striped bordered hover>
                                     <thead>
@@ -103,7 +134,7 @@ const UserList = (props) => {
                         <div className="tab-pane fade" id="nav-profile" role="tabpanel"
                              aria-labelledby="nav-profile-tab">
                             <p></p>
-                            <UserAddForm/>
+                            <UserAddForm users={users} loadData={loadData} handleInputChange={handleInputChange} saveUser={saveUser}/>
                         </div>
                         <div className="tab-pane fade" id="nav-contact" role="tabpanel"
                              aria-labelledby="nav-contact-tab">...
